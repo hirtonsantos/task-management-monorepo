@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@task-app/shared"],
+  output: 'standalone',
   typescript: {
     ignoreBuildErrors: true,
   },

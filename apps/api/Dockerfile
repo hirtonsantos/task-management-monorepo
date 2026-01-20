@@ -1,18 +1,24 @@
 # ======================
 # Builder
 # ======================
-FROM node:20-alpine AS builder
+FROM node:20-bullseye-slim AS builder
 
 WORKDIR /app
 
-# Dependências para node-gyp
-RUN apk add --no-cache python3 make g++ libc6-compat
+# Dependências para node-gyp e PostgreSQL
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    libpq-dev \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install pnpm
 RUN npm install -g pnpm
 
-# Copy workspace files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+# Copy workspace files (incluindo tsconfig.base.json)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.json tsconfig.base.json ./
 COPY packages ./packages
 COPY apps/api ./apps/api
 
@@ -25,11 +31,16 @@ RUN pnpm run build --filter=@task-app/api
 # ======================
 # Runtime (produção)
 # ======================
-FROM node:20-alpine AS runner
+FROM node:20-bullseye-slim AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
+
+# Instalar apenas runtime dependencies do PostgreSQL
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs \

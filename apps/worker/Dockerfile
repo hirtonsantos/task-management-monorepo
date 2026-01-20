@@ -1,7 +1,13 @@
-FROM node:20-alpine AS base
+FROM node:20-bullseye-slim AS base
 
-# Dependências necessárias para node-gyp
-RUN apk add --no-cache python3 make g++ libc6-compat
+# Dependências necessárias para node-gyp e PostgreSQL
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    libpq-dev \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@8.15.0 --activate
@@ -17,7 +23,7 @@ WORKDIR /app
 COPY pnpm-workspace.yaml ./
 COPY package.json pnpm-lock.yaml ./
 COPY turbo.json ./
-COPY tsconfig.json ./
+COPY tsconfig.json tsconfig.base.json ./
 
 # Copy packages
 COPY packages ./packages
@@ -34,11 +40,16 @@ RUN pnpm turbo run build --filter=@task-app/worker...
 # ======================
 # Runner
 # ======================
-FROM node:20-alpine AS runner
+FROM node:20-bullseye-slim AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
+
+# Instalar apenas runtime dependencies do PostgreSQL
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs \
