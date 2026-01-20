@@ -1,0 +1,32 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "baseUrl": ".",             // ESSENCIAL para os paths funcionarem
+    "paths": {                  // mapear os aliases do monorepo
+      "@/*": ["src/*"],
+      "@task-app/shared": ["../../packages/shared/src"],
+      "@task-app/utils": ["../../packages/utils/src"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+, "src/components/features/analytics/kpi-card.stories.tsx"  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
