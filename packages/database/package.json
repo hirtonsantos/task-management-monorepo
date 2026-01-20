@@ -3,24 +3,27 @@
   "version": "1.0.0",
   "private": true,
   "main": "./dist/index.js",
-  "module": "dist/index.mjs",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
-
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-
     "typeorm": "typeorm",
-
     "migration:generate": "pnpm build && typeorm migration:generate -d dist/data-source.js",
     "migration:run": "pnpm build && typeorm migration:run -d dist/data-source.js",
     "migration:revert": "pnpm build && typeorm migration:revert -d dist/data-source.js",
-
     "db:migrate": "pnpm migration:run",
     "db:seed": "pnpm build && node dist/seeds/run-seeds.js",
-
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
