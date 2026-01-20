@@ -1,9 +1,16 @@
 FROM node:20-alpine AS base
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Dependências necessárias para node-gyp
+RUN apk add --no-cache python3 make g++ libc6-compat
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+# ======================
+# Builder
+# ======================
 FROM base AS builder
+
 WORKDIR /app
 
 # Copy workspace files
@@ -21,22 +28,27 @@ COPY apps/worker ./apps/worker
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build packages and worker
+# Build worker
 RUN pnpm turbo run build --filter=@task-app/worker...
 
-FROM base AS runner
+# ======================
+# Runner
+# ======================
+FROM node:20-alpine AS runner
+
 WORKDIR /app
 
-# Copy built files
-COPY --from=builder /app/apps/worker/dist ./dist
-COPY --from=builder /app/apps/worker/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
+ENV NODE_ENV=production
 
 # Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 worker
-USER worker
+RUN addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 worker
 
-ENV NODE_ENV=production
+# Copy built files only
+COPY --from=builder --chown=worker:nodejs /app/apps/worker/dist ./dist
+COPY --from=builder --chown=worker:nodejs /app/apps/worker/package.json ./
+COPY --from=builder --chown=worker:nodejs /app/node_modules ./node_modules
+
+USER worker
 
 CMD ["node", "dist/main.js"]
