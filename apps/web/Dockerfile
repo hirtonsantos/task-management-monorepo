@@ -5,8 +5,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Dependências para node-gyp (OBRIGATÓRIO)
+RUN apk add --no-cache python3 make g++ libc6-compat
+
 # Install pnpm
-RUN npm install -g pnpm
+RUN corepack enable && corepack prepare pnpm@8.15.0 --activate
 
 # Copy workspace files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
@@ -44,7 +47,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/package.json ./package.j
 USER nextjs
 
 EXPOSE 3000
-
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
