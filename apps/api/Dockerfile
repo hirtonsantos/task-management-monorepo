@@ -24,15 +24,23 @@ RUN apt-get update && \
 # Install pnpm
 RUN npm install -g pnpm
 
-# Copy workspace files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.json tsconfig.base.json ./
+# Copy ALL workspace files (incluindo tsconfig.base.json)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY tsconfig.json tsconfig.base.json ./
+
+# Copy ALL packages first (important for dependencies)
 COPY packages ./packages
+
+# Copy API app
 COPY apps/api ./apps/api
 
 # Install deps
 RUN pnpm install --frozen-lockfile
 
-# Build API
+# Build database package explicitly first
+RUN pnpm run build --filter=@task-app/database
+
+# Build API (database will be cached from previous step)
 RUN pnpm run build --filter=@task-app/api
 
 # ======================
