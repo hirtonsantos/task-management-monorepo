@@ -10,7 +10,7 @@ import { LoggerService } from "./services/logger.service"
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [".env.local", ".env"],
+      // envFilePath: [".env.local", ".env"],
     }),
   ],
   controllers: [NotificationController],

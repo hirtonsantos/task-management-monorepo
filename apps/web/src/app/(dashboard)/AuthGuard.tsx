@@ -3,11 +3,11 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/lib/stores/auth-store"
-import { Loader2 } from "lucide-react"
+// import { Loader2 } from "lucide-react"
 
-const Loader = Loader2 as unknown as React.ComponentType<
-  React.SVGProps<SVGSVGElement> & { className?: string }
->
+// const Loader = Loader2 as unknown as React.ComponentType<
+//   React.SVGProps<SVGSVGElement> & { className?: string }
+// >
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()

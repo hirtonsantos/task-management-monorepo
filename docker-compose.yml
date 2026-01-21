@@ -54,37 +54,149 @@ services:
       - task-network
 
   db-seed:
-      image: node:20
-      container_name: tasknode
-      working_dir: /app
-      volumes:
-        - .:/app
-        - node_modules:/app/node_modules
-        - pnpm_store:/app/.pnpm-store
-      depends_on:
-        postgres:
-          condition: service_healthy
-      environment:
-        # Todas as formas possíveis de configuração
-        DATABASE_URL: postgresql://taskuser:taskpass@postgres:5432/taskdb
-        POSTGRES_HOST: postgres
-        POSTGRES_PORT: "5432"
-        POSTGRES_USER: taskuser
-        POSTGRES_PASSWORD: taskpass
-        POSTGRES_DB: taskdb
-        NODE_ENV: development
-        # Forçar IPv4
-        NODE_OPTIONS: "--dns-result-order=ipv4first"
-      command: ["./scripts/wait-and-seed.sh"]
-      networks:
-        - task-network
+    image: node:20
+    container_name: tasknode
+    working_dir: /app
+    volumes:
+      - .:/app:cached
+      - node_modules:/app/node_modules
+      - pnpm_store:/app/.pnpm-store
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://taskuser:taskpass@postgres:5432/taskdb
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: taskuser
+      POSTGRES_PASSWORD: taskpass
+      POSTGRES_DB: taskdb
+      NODE_ENV: development
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
+    command: ["./scripts/wait-and-seed.sh"]
+    networks:
+      - task-network
+
+  # 🔹 NOVO: API Service
+  api:
+    image: node:20
+    container_name: taskapi
+    working_dir: /app
+    volumes:
+      - .:/app:cached
+      - node_modules:/app/node_modules
+      - pnpm_store:/app/.pnpm-store
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      db-seed:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://taskuser:taskpass@postgres:5432/taskdb
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: taskuser
+      POSTGRES_PASSWORD: taskpass
+      POSTGRES_DB: taskdb
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ""
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USER: taskuser
+      RABBITMQ_PASSWORD: taskpass
+      RABBITMQ_URL: amqp://taskuser:taskpass@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production-min-32-chars
+      JWT_EXPIRES_IN: 7d
+      JWT_REFRESH_SECRET: your-refresh-secret-key-change-in-production-min-32-chars
+      JWT_REFRESH_EXPIRES_IN: 30d
+      API_PORT: "3001"
+      API_PREFIX: api/v1
+      NODE_ENV: development
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
+      THROTTLE_TTL: "60"
+      THROTTLE_LIMIT: "100"
+    command: sh -c "npm install -g pnpm && pnpm install && pnpm --filter @task-app/api dev"
+    networks:
+      - task-network
+    restart: unless-stopped
+
+  # 🔹 NOVO: Worker Service
+  worker:
+    image: node:20
+    container_name: taskworker
+    working_dir: /app
+    volumes:
+      - .:/app:cached
+      - node_modules:/app/node_modules
+      - pnpm_store:/app/.pnpm-store
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      db-seed:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://taskuser:taskpass@postgres:5432/taskdb
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: taskuser
+      POSTGRES_PASSWORD: taskpass
+      POSTGRES_DB: taskdb
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USER: taskuser
+      RABBITMQ_PASSWORD: taskpass
+      RABBITMQ_URL: amqp://taskuser:taskpass@rabbitmq:5672
+      NODE_ENV: development
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
+    command: sh -c "npm install -g pnpm && pnpm install && pnpm --filter @task-app/worker dev"
+    networks:
+      - task-network
+    restart: unless-stopped
+
+  # 🔹 NOVO: Web Service (Next.js)
+  web:
+    image: node:20
+    container_name: taskweb
+    working_dir: /app
+    volumes:
+      - .:/app:cached
+      - node_modules:/app/node_modules
+      - pnpm_store:/app/.pnpm-store
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_started
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
+      NODE_ENV: development
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
+    command: sh -c "npm install -g pnpm && pnpm install && pnpm --filter @task-app/web dev"
+    networks:
+      - task-network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
   redis_data:
   rabbitmq_data:
-  node_modules:      # Volume para node_modules
-  pnpm_store:        # Volume para pnpm store
+  node_modules:
+  pnpm_store:
 
 networks:
   task-network:

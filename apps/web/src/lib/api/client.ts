@@ -17,8 +17,10 @@ apiClient.interceptors.request.use(
     if (isBrowser) {
       const token = (globalThis as any).localStorage.getItem("accessToken")
       if (token) {
-        if (!config.headers) config.headers = {} as any
-        ;(config.headers as any).Authorization = `Bearer ${token}`
+        if (!config.headers) {
+          config.headers = {} as any;
+        }
+        (config.headers as any).Authorization = `Bearer ${token}`;
       }
     }
     return config
@@ -75,9 +77,11 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest)
       } catch (err) {
         if (isBrowser) {
-          (globalThis as any).localStorage.removeItem("accessToken")
-          (globalThis as any).localStorage.removeItem("refreshToken")
-          ;(globalThis as any).location.href = "/login"
+          if (isBrowser) {
+            (globalThis as any).localStorage.removeItem("accessToken");
+            (globalThis as any).localStorage.removeItem("refreshToken");
+            (globalThis as any).location.href = "/login";
+          }
         }
         return Promise.reject(error)
       }

@@ -20,7 +20,6 @@ import { JwtAuthGuard } from "./modules/auth/guards/jwt-auth.guard"
 
 // Entities
 import { User, Task, Category, AuditLog } from "@task-app/database"
-import { join } from "path"
 
 console.log("JWT_SECRET:", process.env.JWT_SECRET)
 
@@ -29,7 +28,6 @@ console.log("JWT_SECRET:", process.env.JWT_SECRET)
     // Config
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: join(process.cwd(), "..", "..", ".env"),
     }),
 
     // Database
@@ -86,4 +84,4 @@ console.log("JWT_SECRET:", process.env.JWT_SECRET)
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
