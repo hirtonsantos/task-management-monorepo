@@ -35,12 +35,9 @@ pnpm web
 cd apps/api
 pnpm test:e2e
 
-# 7. Inicialize os serviços necessários via Docker Compose
+# 7. Inicialize os serviços necessários para rodar via Docker Compose
 # Inclui PostgreSQL, Redis e RabbitMQ, sem necessidade de dependências externas
 docker compose up
-
-# 8. Execute o projeto em modo de desenvolvimento
-pnpm dev
 ```
 
 ## 📁 Estrutura do Projeto
