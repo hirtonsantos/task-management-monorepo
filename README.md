@@ -13,26 +13,33 @@ Sistema enterprise de gestão de tarefas construído com **Turborepo**, **NestJS
 ### Instalação
 
 ```bash
-# Clone o repositório
+# 1. Clone o repositório
 git clone <repo-url>
 cd task-management
 
-# Instale as dependências
+# 2. Instale as dependências do projeto
 pnpm install
 
-# Copie o arquivo de ambiente
+# 3. Configure as variáveis de ambiente
 cp .env.example .env
+# ⚠️ Edite o arquivo .env caso seja necessário ajustar alguma variável
 
-# Suba os serviços Docker
-pnpm docker:up
+#4. Faça o build do projeto (Obrigatório)
+pnpm build
 
-# Execute as migrations
-pnpm db:migrate
+#5. Rodar testes do front
+cd apps/web
+pnpm web
 
-# (Opcional) Seed do banco
-pnpm db:seed
+#6. Rodar testes do backend
+cd apps/api
+pnpm test:e2e
 
-# Inicie o desenvolvimento
+# 7. Inicialize os serviços necessários via Docker Compose
+# Inclui PostgreSQL, Redis e RabbitMQ, sem necessidade de dependências externas
+docker compose up
+
+# 8. Execute o projeto em modo de desenvolvimento
 pnpm dev
 ```
 
