@@ -20,7 +20,11 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@task-app/database": ["../../packages/database/src"],
+      "@task-app/shared": ["../../packages/shared/src"],
+      "@task-app/config": ["../../packages/config/src"],
+      "@task-app/utils": ["../../packages/utils/src"]
     }
   },
   "include": ["src/**/*"],
