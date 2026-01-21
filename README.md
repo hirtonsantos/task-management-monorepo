@@ -99,3 +99,8 @@ pnpm db:seed      # Seed do banco
 
 - [API Docs](http://localhost:3001/api/docs) - Swagger/OpenAPI
 - [Storybook](http://localhost:6006) - Design System
+
+## Observações Gerais:
+
+- Não é necessário rodar pnpm dev, Docker Compose é o seu orquestrador
+- Abrir Frontend pelo http://localhost:3000/login
