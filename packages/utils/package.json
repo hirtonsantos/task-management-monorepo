@@ -6,7 +6,6 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "dev": "storybook dev -p 6006",
     "lint": "eslint src/",
     "test": "jest",
     "clean": "rm -rf dist .turbo"

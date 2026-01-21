@@ -7,6 +7,7 @@ export const dataSourceOptions: DataSourceOptions = {
   type: "postgres",
   host: process.env.POSTGRES_HOST || "localhost",
   port: Number.parseInt(process.env.POSTGRES_PORT || "5432", 10),
+  url: process.env.DATABASE_URL,
   username: process.env.POSTGRES_USER || "taskuser",
   password: process.env.POSTGRES_PASSWORD || "taskpass",
   database: process.env.POSTGRES_DB || "taskdb",
