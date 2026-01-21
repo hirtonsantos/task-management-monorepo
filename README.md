@@ -90,6 +90,11 @@ pnpm db:seed      # Seed do banco
 - **RabbitMQ:** taskuser / taskpass (UI: http://localhost:15672)
 - **Redis:** sem senha em dev
 
+## Test credentials (Docker Compose rodando)
+
+- **Admin:** admin@taskapp.com / admin123
+- **User:**  demo@taskapp.com / user123
+
 ## 📚 Documentação
 
 - [API Docs](http://localhost:3001/api/docs) - Swagger/OpenAPI
